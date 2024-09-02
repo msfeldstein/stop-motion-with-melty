@@ -6,10 +6,19 @@ import CaptureButton from '../components/CaptureButton';
 import FrameStack from '../components/FrameStack';
 import styles from './page.module.css';
 
+declare global {
+  interface Window {
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
+  }
+}
+
 export default function Home() {
   const [frames, setFrames] = useState<string[]>([]);
   const [isExporting, setIsExporting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const recognitionRef = useRef<any>(null);
+  const chimeAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const captureFrame = useCallback(() => {
     if (videoRef.current) {
@@ -19,6 +28,11 @@ export default function Home() {
       canvas.getContext('2d')?.drawImage(videoRef.current, 0, 0);
       const frameDataUrl = canvas.toDataURL('image/jpeg');
       setFrames(prevFrames => [...prevFrames, frameDataUrl]);
+      
+      // Play chime sound
+      if (chimeAudioRef.current) {
+        chimeAudioRef.current.play();
+      }
     }
   }, []);
 
@@ -32,8 +46,37 @@ export default function Home() {
 
     window.addEventListener('keydown', handleKeyPress);
 
+    // Set up speech recognition
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = false;
+
+      recognitionRef.current.onresult = (event: any) => {
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            const transcript = event.results[i][0].transcript.trim().toLowerCase();
+            if (transcript === 'now') {
+              captureFrame();
+            }
+          }
+        }
+      };
+
+      recognitionRef.current.start();
+    } else {
+      console.error('Speech recognition not supported in this browser');
+    }
+
+    // Set up chime audio
+    chimeAudioRef.current = new Audio('/chime.mp3');  // Make sure to add a chime.mp3 file to your public folder
+
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
     };
   }, [captureFrame]);
 
