@@ -1,9 +1,13 @@
 import React from 'react';
 import styles from '../app/page.module.css';
 
-const CaptureButton: React.FC = () => {
+interface CaptureButtonProps {
+  onCapture: () => void;
+}
+
+const CaptureButton: React.FC<CaptureButtonProps> = ({ onCapture }) => {
   return (
-    <button className={styles.captureButton}>
+    <button className={styles.captureButton} onClick={onCapture}>
       Capture
     </button>
   );
