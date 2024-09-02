@@ -1,11 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import styles from '../app/page.module.css';
 
 const CameraPreview: React.FC<{ videoRef: React.RefObject<HTMLVideoElement> }> = ({ videoRef }) => {
-  const videoRef = useRef<HTMLVideoElement>(null);
-
   useEffect(() => {
     async function setupCamera() {
       try {
@@ -28,7 +26,7 @@ const CameraPreview: React.FC<{ videoRef: React.RefObject<HTMLVideoElement> }> =
         tracks.forEach(track => track.stop());
       }
     };
-  }, []);
+  }, [videoRef]);
 
   return (
     <div className={styles.cameraPreview}>
