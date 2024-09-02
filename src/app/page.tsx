@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useRef } from 'react';
 import CameraPreview from '../components/CameraPreview';
 import CaptureButton from '../components/CaptureButton';

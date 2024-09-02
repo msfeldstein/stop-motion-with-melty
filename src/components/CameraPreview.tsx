@@ -1,7 +1,9 @@
+'use client';
+
 import React, { useEffect, useRef } from 'react';
 import styles from '../app/page.module.css';
 
-const CameraPreview: React.FC = () => {
+const CameraPreview: React.FC<{ videoRef: React.RefObject<HTMLVideoElement> }> = ({ videoRef }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
