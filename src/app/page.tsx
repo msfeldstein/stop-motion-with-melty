@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import CameraPreview from '../components/CameraPreview';
 import CaptureButton from '../components/CaptureButton';
 import FrameStack from '../components/FrameStack';
@@ -18,7 +18,7 @@ export default function Home() {
   const [isExporting, setIsExporting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const recognitionRef = useRef<any>(null);
-  const chimeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
 
   const captureFrame = useCallback(() => {
     if (videoRef.current) {
@@ -30,9 +30,7 @@ export default function Home() {
       setFrames(prevFrames => [...prevFrames, frameDataUrl]);
       
       // Play chime sound
-      if (chimeAudioRef.current) {
-        chimeAudioRef.current.play();
-      }
+      playChimeSound();
     }
   }, []);
 
@@ -69,8 +67,8 @@ export default function Home() {
       console.error('Speech recognition not supported in this browser');
     }
 
-    // Set up chime audio
-    chimeAudioRef.current = new Audio('/chime.mp3');  // Make sure to add a chime.mp3 file to your public folder
+    // Initialize AudioContext
+    audioContextRef.current = new (window.AudioContext || (window as any).webkitAudioContext)();
 
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
@@ -79,6 +77,25 @@ export default function Home() {
       }
     };
   }, [captureFrame]);
+
+  const playChimeSound = useCallback(() => {
+    if (audioContextRef.current) {
+      const oscillator = audioContextRef.current.createOscillator();
+      const gainNode = audioContextRef.current.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContextRef.current.destination);
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioContextRef.current.currentTime); // A5 note
+      gainNode.gain.setValueAtTime(0, audioContextRef.current.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.5, audioContextRef.current.currentTime + 0.01);
+      gainNode.gain.linearRampToValueAtTime(0, audioContextRef.current.currentTime + 0.3);
+
+      oscillator.start();
+      oscillator.stop(audioContextRef.current.currentTime + 0.3);
+    }
+  }, []);
 
   const exportVideo = async () => {
     if (frames.length === 0) {
