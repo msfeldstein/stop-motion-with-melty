@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback, useContext } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CameraPreview from '../components/CameraPreview';
 import CaptureButton from '../components/CaptureButton';
 import FrameStack from '../components/FrameStack';
@@ -152,7 +152,7 @@ export default function Home() {
   return (
     <main className={styles.main}>
       <div className={styles.cameraContainer}>
-        <CameraPreview videoRef={videoRef} />
+        <CameraPreview videoRef={videoRef} previousFrame={frames[frames.length - 1]} />
         <CaptureButton onCapture={captureFrame} />
       </div>
       <div className={styles.frameStackContainer}>

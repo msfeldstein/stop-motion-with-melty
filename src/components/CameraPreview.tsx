@@ -3,7 +3,12 @@
 import React, { useEffect } from 'react';
 import styles from '../app/page.module.css';
 
-const CameraPreview: React.FC<{ videoRef: React.RefObject<HTMLVideoElement> }> = ({ videoRef }) => {
+interface CameraPreviewProps {
+  videoRef: React.RefObject<HTMLVideoElement>;
+  previousFrame?: string;
+}
+
+const CameraPreview: React.FC<CameraPreviewProps> = ({ videoRef, previousFrame }) => {
   useEffect(() => {
     async function setupCamera() {
       try {
@@ -31,9 +36,13 @@ const CameraPreview: React.FC<{ videoRef: React.RefObject<HTMLVideoElement> }> =
   return (
     <div className={styles.cameraPreview}>
       <video ref={videoRef} autoPlay playsInline muted className={styles.video} />
+      {previousFrame && (
+        <div className={styles.onionskin}>
+          <img src={previousFrame} alt="Previous frame" />
+        </div>
+      )}
     </div>
   );
 };
 
 export default CameraPreview;
-
