@@ -9,8 +9,7 @@ interface CaptureButtonProps {
 
 const CaptureButton: React.FC<CaptureButtonProps> = ({ onCapture }) => {
   return (
-    <button className={styles.captureButton} onClick={onCapture}>
-      Capture
+    <button className={styles.captureButton} onClick={onCapture} aria-label="Capture frame">
     </button>
   );
 };

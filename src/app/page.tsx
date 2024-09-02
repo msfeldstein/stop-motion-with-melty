@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import CameraPreview from '../components/CameraPreview';
 import CaptureButton from '../components/CaptureButton';
 import FrameStack from '../components/FrameStack';
@@ -11,7 +11,7 @@ export default function Home() {
   const [isExporting, setIsExporting] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const captureFrame = () => {
+  const captureFrame = useCallback(() => {
     if (videoRef.current) {
       const canvas = document.createElement('canvas');
       canvas.width = videoRef.current.videoWidth;
@@ -20,7 +20,22 @@ export default function Home() {
       const frameDataUrl = canvas.toDataURL('image/jpeg');
       setFrames(prevFrames => [...prevFrames, frameDataUrl]);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.code === 'Space') {
+        event.preventDefault();
+        captureFrame();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [captureFrame]);
 
   const exportVideo = async () => {
     if (frames.length === 0) {
